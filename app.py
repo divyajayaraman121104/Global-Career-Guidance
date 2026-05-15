@@ -2346,7 +2346,6 @@ subfield_questions_zulu = {
         ("Space Policy & Law","Ngithakasele ukusebenzisa izifundo zomthetho nezombusazwe ekuphatheni ukusetshenziswa komkhathi."),
     ],
 }
-
 # ── SUBFIELD QUESTIONS: SWAHILI ───────────────────────────────────────────────
 subfield_questions_swahili = {
     "Technology & Engineering": [
@@ -5038,27 +5037,32 @@ document.addEventListener("mouseout", function(e) {{
 </body>
 </html>"""
 
+        # Open report in new tab - FIXED VERSION
     import base64
-    enc = base64.b64encode(report_html.encode()).decode()
-    _banner_title = {"English":"Report Generated Successfully!","Zulu":"Umbiko Ukhiqiziwe Ngempumelelo!","Swahili":"Ripoti Imetengenezwa Kwa Mafanikio!"}.get(report_lang,"Report Generated Successfully!")
-    _banner_sub   = {"English":"Your career intelligence report has opened in a new tab.","Zulu":"Umbiko wakho wemisebenzi uvuliwe ku-tab entsha.","Swahili":"Ripoti yako ya akili ya kazi imefunguliwa kwenye kichupo kipya."}.get(report_lang,"Your career intelligence report has opened in a new tab.")
+    report_b64 = base64.b64encode(report_html.encode()).decode()
+    
     components.html(f"""
     <script>
-        // Decode base64 preserving full UTF-8
-        const b64 = "{enc}";
-        const bin = atob(b64);
-        const bytes = new Uint8Array(bin.length);
-        for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-        const b = new Blob([bytes], {{type:'text/html;charset=utf-8'}});
-        window.open(URL.createObjectURL(b), '_blank');
+        // Decode base64 and open in new tab
+        const b64 = "{report_b64}";
+        const binaryString = atob(b64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {{
+            bytes[i] = binaryString.charCodeAt(i);
+        }}
+        const blob = new Blob([bytes], {{type: 'text/html;charset=utf-8'}});
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        // Clean up
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     </script>
     <div style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(99,102,241,0.07));border:1px solid rgba(255,255,255,0.35);border-radius:16px;padding:22px 28px;font-family:'DM Sans',sans-serif;color:#ffffff;text-align:center;">
         <div style="font-size:26px;margin-bottom:8px;">✅</div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:5px;color:#ffffff;">{_banner_title}</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.85);">{_banner_sub}</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:5px;color:#ffffff;">Report Generated Successfully!</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.85);">Your career report has opened in a new tab.</div>
     </div>
-    """, height=115)
+    """, height=150)
 
     # Reset subfield state so user can retake if needed
     st.session_state["sf_show_subfield_q"] = False
-    st.session_state["sf_report_ready"]    = False
+    st.session_state["sf_report_ready"] = False
